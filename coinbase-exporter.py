@@ -68,7 +68,7 @@ class CoinbaseCollector:
             time.sleep(1)
             account['transactions'] = self._get_transactions(account=account)
             accounts_data.append(account)
-            #LOG.debug(account)
+            # LOG.debug(account)
         if accounts_data:
             self.cb_accounts = accounts_data
 
