@@ -32,12 +32,13 @@ class CoinbaseCollector:
             raise ValueError("Missing API_KEY or API_SECRET environment variable.")
         self._cb = Client(self._api_key, self._api_secret)
 
-    def _get_transactions(self, account, last_transactions=None):
+    def get_transactions(self, account, last_transactions=None):
+        """ Gets the transactions history from coinbase """
         if last_transactions:
             transactions = last_transactions
         else:
             transactions = self._cb.get_transactions(account['id'], limit=100)
-        LOG.debug('starting _get_transactions')
+        LOG.debug('starting get_transactions')
         LOG.debug(transactions)
 
         if transactions.get('pagination') and transactions['pagination']:
@@ -55,7 +56,7 @@ class CoinbaseCollector:
             LOG.debug("no more pagination")
 
         if transactions.get('pagination') and transactions['pagination']:
-            transactions = self._get_transactions(account=account, last_transactions=transactions)
+            transactions = self.get_transactions(account=account, last_transactions=transactions)
         else:
             LOG.debug("no more pagination 2")
         LOG.debug(transactions)
@@ -66,13 +67,14 @@ class CoinbaseCollector:
         accounts = self._cb.get_accounts()
         for account in accounts['data']:
             time.sleep(1)
-            account['transactions'] = self._get_transactions(account=account)
+            account['transactions'] = self.get_transactions(account=account)
             accounts_data.append(account)
             # LOG.debug(account)
         if accounts_data:
             self.cb_accounts = accounts_data
 
     def describe(self):
+        """ Just a needed method, so that collect() isn't called at startup """
         return []
 
     def collect(self):
