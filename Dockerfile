@@ -3,7 +3,7 @@ LABEL ai.ix.maintainer="docker@ix.ai"
 
 RUN pip3 install coinbase
 
-ENV LOGLEVEL=INFO
+ENV LOGLEVEL=INFO FIAT=EUR
 
 COPY coinbase-exporter.py /
 

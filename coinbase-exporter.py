@@ -25,44 +25,36 @@ class CoinbaseCollector:
     cb_accounts = []
 
     def __init__(self):
-        self.default_currency = os.environ.get("DEFAULT_CURRENCY", 'USD')
+        self.fiat = os.environ.get("FIAT", 'EUR')
         self._api_key = os.environ.get("API_KEY")
         self._api_secret = os.environ.get("API_SECRET")
         if not self._api_key or not self._api_secret:
             raise ValueError("Missing API_KEY or API_SECRET environment variable.")
         self._cb = Client(self._api_key, self._api_secret)
 
-    def get_transactions(self, account, last_transactions=None):
+    def get_transactions(self, account):
         """ Gets the transactions history from coinbase """
-        if last_transactions:
-            transactions = last_transactions
-        else:
-            transactions = self._cb.get_transactions(account['id'], limit=100)
-        LOG.debug('starting get_transactions')
-        LOG.debug(transactions)
+        all_txns = []
+        starting_after = None
+        while True:
+            txns = self._cb.get_transactions(account['id'], limit=100, starting_after=starting_after)
+            if txns.pagination.next_starting_after is not None:
+                starting_after = txns.pagination.next_starting_after
+                for tx in txns.data:
+                    all_txns.append(tx)
+                time.sleep(1)  # Let's not hit the rate limiting
+            else:
+                for tx in txns.data:
+                    all_txns.append(tx)
+                break
 
-        if transactions.get('pagination') and transactions['pagination']:
-            if transactions['pagination'].get('next_uri'):
-                new_transactions = self._cb.get_transactions(
-                    account['id'],
-                    limit=2,
-                    starting_after=transactions['pagination']['starting_after']
-                )
-                if new_transactions.get('pagination') and new_transactions['pagination'].get('next_uri'):
-                    transactions['pagination'] = new_transactions['pagination']
-                for transaction in new_transactions['data']:
-                    transactions['data'].append(transaction)
-        else:
-            LOG.debug("no more pagination")
+        # LOG.info(all_txns)
+        for tx in all_txns:
+            LOG.debug('Found tx: {} for {} {}'.format(tx.id, tx.amount.amount, tx.amount.currency))
+        return all_txns
 
-        if transactions.get('pagination') and transactions['pagination']:
-            transactions = self.get_transactions(account=account, last_transactions=transactions)
-        else:
-            LOG.debug("no more pagination 2")
-        LOG.debug(transactions)
-        return transactions
-
-    def _connect_coinbase(self):
+    def get_accounts(self):
+        """ Establishes the connection to coinbase and saves the accounts in self.cb_accounts """
         accounts_data = []
         accounts = self._cb.get_accounts()
         for account in accounts['data']:
@@ -80,7 +72,7 @@ class CoinbaseCollector:
     def collect(self):
         "The actual collecting class"
 
-        self._connect_coinbase()
+        self.get_accounts()
         metrics = {
             'account_balance': GaugeMetricFamily(
                 'account_balance',
@@ -94,7 +86,7 @@ class CoinbaseCollector:
             ),
         }
 
-        if self._cb:
+        if self.cb_accounts:
             for cb_account in self.cb_accounts:
                 metrics['account_balance'].add_metric(
                     value=float(cb_account['balance']['amount']),
@@ -105,8 +97,8 @@ class CoinbaseCollector:
                         'coinbase',
                     ]
                 )
-                if cb_account['balance']['currency'] != self.default_currency:
-                    transaction = self._get_transaction_sum(account=cb_account)
+                if cb_account['balance']['currency'] != self.fiat:
+                    transaction = self.sum_transactions(account=cb_account)
                     metrics['coinbase_account_transaction_amount'].add_metric(
                         value=float(transaction['amount']),
                         labels=[
@@ -119,22 +111,22 @@ class CoinbaseCollector:
             for m in metrics.values():
                 yield m
 
-    def _get_transaction_sum(self, account):
+    def sum_transactions(self, account):
+        """ Calculates the total transaction sum for FIAT """
         account_transaction = {
             'amount': float(0),
-            'currency': self.default_currency,
+            'currency': self.fiat,
             'target_currency': account['balance']['currency'],
             'account': account['id'],
         }
-        if 'data' in account['transactions']:
-            for transaction in account['transactions']['data']:
-                if (
-                        transaction['type'] in ['buy', 'sell']
-                        and transaction['status'] in ['completed']
-                        and transaction['native_amount']['currency'] == account_transaction['currency']
-                        and account_transaction['currency'] != transaction['amount']['currency']
-                ):
-                    account_transaction['amount'] += float(transaction['native_amount']['amount'])
+        for tx in account['transactions']:
+            if (
+                    tx['type'] in ['buy', 'sell']
+                    and tx['status'] in ['completed']
+                    and tx['native_amount']['currency'] == account_transaction['currency']
+                    and account_transaction['currency'] != tx['amount']['currency']
+            ):
+                account_transaction['amount'] += float(tx['native_amount']['amount'])
 
         return account_transaction
 
