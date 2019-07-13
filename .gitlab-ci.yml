@@ -15,7 +15,7 @@ pylint:
   script:
     - curl -o .pylintrc https://tool.ix.ai/.pylintrc
     - pip install prometheus_client pylint coinbase
-    - pylint --rcfile=.pylintrc *.py
+    - pylint --rcfile=.pylintrc src/*.py
 
 build:
   image: docker:latest
