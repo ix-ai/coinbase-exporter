@@ -5,7 +5,7 @@ RUN pip3 install coinbase
 
 ENV LOGLEVEL=INFO FIAT=EUR
 
-COPY coinbase-exporter.py /
+COPY src/coinbase-exporter.py /
 
 EXPOSE 9308
 
