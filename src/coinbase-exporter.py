@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """ Connects to Coinbase and exposes data to prometheus """
+
 import logging
 import time
 import os
 import sys
+import pygelf
 from prometheus_client import start_http_server
-from prometheus_client.core import REGISTRY, GaugeMetricFamily
+from prometheus_client.core import GaugeMetricFamily
 from coinbase.wallet.client import Client
 
 LOG = logging.getLogger(__name__)
@@ -15,6 +17,22 @@ logging.basicConfig(
     format='%(asctime)s.%(msecs)03d %(levelname)s {%(module)s} [%(funcName)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+
+
+def configure_logging():
+    """ Configures the logging """
+    gelf_enabled: False
+
+    if os.environ.get('GELF_HOST'):
+        GELF = pygelf.GelfUdpHandler(
+            host=os.environ.get('GELF_HOST'),
+            port=int(os.environ.get('GELF_PORT', 12201)),
+            debug=True,
+            include_extra_fields=True
+        )
+        LOG.addHandler(GELF)
+        gelf_enabled = True
+    LOG.info('Initialized logging with GELF enabled: {}'.format(gelf_enabled))
 
 
 class CoinbaseCollector:
@@ -48,7 +66,6 @@ class CoinbaseCollector:
                     all_txns.append(tx)
                 break
 
-        # LOG.info(all_txns)
         for tx in all_txns:
             LOG.debug('Found tx: {} for {} {}'.format(tx.id, tx.amount.amount, tx.amount.currency))
         return all_txns
@@ -61,7 +78,6 @@ class CoinbaseCollector:
             time.sleep(1)
             account['transactions'] = self.get_transactions(account=account)
             accounts_data.append(account)
-            # LOG.debug(account)
         if accounts_data:
             self.cb_accounts = accounts_data
 
@@ -132,9 +148,9 @@ class CoinbaseCollector:
 
 
 if __name__ == '__main__':
-    REGISTRY.register(CoinbaseCollector())
-    port = 9308
-    start_http_server(port)
-    LOG.info('Listening for requests on port {}'.format(port))
+    configure_logging()
+    PORT = int(os.environ.get('PORT', 9308))
+    LOG.info("Starting on port {}".format(PORT))
+    start_http_server(PORT)
     while True:
         time.sleep(1)
