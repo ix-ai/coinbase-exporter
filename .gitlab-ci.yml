@@ -1,14 +1,23 @@
 variables:
   DOCKER_DRIVER: overlay2
-  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   PORT: 9308
 
 stages:
   - lint
   - build
 
-services:
-  - docker:dind
+.tags-template: &tags-definition
+  tags:
+    - ix-ai
+
+.build-template: &build-definition
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  stage: build
+  script:
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"username\":\"${CI_REGISTRY_USER}\",\"password\":\"${CI_REGISTRY_PASSWORD}\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context ${CI_PROJECT_DIR} --dockerfile ${CI_PROJECT_DIR}/Dockerfile --destination ${IMAGE_TAG}
 
 pylint:
   image: python:latest
@@ -18,14 +27,18 @@ pylint:
     - pip install prometheus_client pylint coinbase pygelf
     - pylint --rcfile=.pylintrc src/*.py
 
-build:
-  image: docker:latest
-  stage: build
+build:test:
+  except:
+    - master
+  before_script:
+    - export IMAGE_TAG="${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
+  <<: *tags-definition
+  <<: *build-definition
+
+build:release:
   only:
-    - /^latest$/
-    - tags
-    - /(.*)-dev$/
-  script:
-    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
-    - docker build -f Dockerfile -t ${IMAGE_TAG} --build-arg PORT="${PORT}" .
-    - docker push ${IMAGE_TAG}
+    - master
+  before_script:
+    - export IMAGE_TAG="${CI_REGISTRY_IMAGE}:latest"
+  <<: *tags-definition
+  <<: *build-definition
