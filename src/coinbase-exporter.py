@@ -149,7 +149,7 @@ class CoinbaseCollector:
 
 if __name__ == '__main__':
     configure_logging()
-    PORT = int(os.environ.get('PORT', 9308))
+    PORT = int(os.environ.get('PORT', '9308'))
     LOG.info("Starting on port {}".format(PORT))
     REGISTRY.register(CoinbaseCollector())
     start_http_server(PORT)
