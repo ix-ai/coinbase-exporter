@@ -26,6 +26,7 @@ pylint:
     - curl -o .pylintrc https://tool.ix.ai/.pylintrc
     - pip install prometheus_client pylint coinbase pygelf
     - pylint --rcfile=.pylintrc src/*.py
+  <<: *tags-definition
 
 build:test:
   except:
