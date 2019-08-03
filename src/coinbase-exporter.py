@@ -29,7 +29,7 @@ def configure_logging():
             port=int(os.environ.get('GELF_PORT', 12201)),
             debug=True,
             include_extra_fields=True,
-            _ix_id=os.path.splitext(sys.modules['__main__'].__file__)[0],
+            _ix_id=os.path.splitext(sys.modules['__main__'].__file__)[0][1:],  # sets it to 'coinbase-exporter'
         )
         LOG.addHandler(GELF)
         gelf_enabled = True
