@@ -1,11 +1,15 @@
-FROM registry.gitlab.com/ix.ai/alpine:latest
-LABEL MAINTAINER="docker@ix.ai"
+FROM alpine:latest
+LABEL maintainer="docker@ix.ai"
 
-ARG PORT
+ARG PORT=9308
+ARG LOGLEVEL=INFO
+ARG FIAT=EUR
 
-RUN pip3 install --no-cache-dir coinbase
+RUN apk --no-cache upgrade && \
+    apk --no-cache add python3 gcc musl-dev && \
+    pip3 install --no-cache-dir prometheus_client pygelf coinbase
 
-ENV LOGLEVEL=INFO FIAT=EUR PORT=${PORT}
+ENV LOGLEVEL=${LOGLEVEL} FIAT=${FIAT} PORT=${PORT}
 
 COPY src/coinbase-exporter.py /
 
