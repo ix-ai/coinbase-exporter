@@ -153,7 +153,7 @@ if __name__ == '__main__':
     configure_logging()
     PORT = int(os.environ.get('PORT', '9308'))
     LOG.warning(
-        "Starting coinbase-exporter {} with on port {}".format(
+        "Starting coinbase-exporter {} on port {}".format(
             # pylint: disable=no-member
             constants.VERSION,
             PORT
