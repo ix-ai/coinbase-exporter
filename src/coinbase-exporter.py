@@ -9,6 +9,7 @@ import pygelf
 from prometheus_client import start_http_server
 from prometheus_client.core import REGISTRY, GaugeMetricFamily
 from coinbase.wallet.client import Client
+import constants
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(
@@ -151,8 +152,16 @@ class CoinbaseCollector:
 if __name__ == '__main__':
     configure_logging()
     PORT = int(os.environ.get('PORT', '9308'))
-    LOG.info("Starting on port {}".format(PORT))
-    REGISTRY.register(CoinbaseCollector())
-    start_http_server(PORT)
-    while True:
-        time.sleep(1)
+    LOG.warning(
+        "Starting coinbase-exporter {} on port {}".format(
+            # pylint: disable=no-member
+            constants.VERSION,
+            PORT
+        )
+    )
+    TEST = os.environ.get('TEST', False)
+    if not TEST:
+        REGISTRY.register(CoinbaseCollector())
+        start_http_server(PORT)
+        while True:
+            time.sleep(1)

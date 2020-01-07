@@ -1,8 +1,18 @@
 variables:
   DOCKER_DRIVER: overlay2
-  PORT: 9308
   DOCKERHUB_REPO_PREFIX: ixdotai
   DOCKERHUB_REPO_NAME: coinbase-exporter
 
 include:
   - remote: https://gitlab.com/ix.ai/ci-templates/raw/master/python-project.yml
+
+test:
+  extends:
+    - .tags-template
+  stage: test
+  image: python:latest
+  variables:
+    TEST: 'true'
+  script:
+    - pip3 install --no-cache-dir -r src/requirements.txt
+    - python3 src/${CI_PROJECT_NAME}.py
