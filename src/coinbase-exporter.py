@@ -159,9 +159,9 @@ if __name__ == '__main__':
             PORT
         )
     )
-    REGISTRY.register(CoinbaseCollector())
     TEST = os.environ.get('TEST', False)
     if not TEST:
+        REGISTRY.register(CoinbaseCollector())
         start_http_server(PORT)
         while True:
             time.sleep(1)
