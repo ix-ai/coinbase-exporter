@@ -20,15 +20,11 @@ docker run --rm -it -p 9999:9999 \
 ```
 ## Tags and Arch
 
-Starting with version 0.4.0, the following tags are available for the docker images:
-* `vN.N.N` (amd64) - for example v0.4.0
-* `vN.N.N-armv7` (arm) - for example v0.4.0-armv7
-* `latest` (amd64) - always pointing to the latest version
-* `latest-armv7` (arm) - always pointing to the latest version
-* `dev-branch` (amd64) - the last build on a feature/development branch
-* `dev-branch-armv7` (arm) - the last build on a feature/development branch
-* `dev-master` (amd64) - the last build on the master branch
-* `dev-master-armv7` (arm) - the last build on the master branch
+Starting with version 0.4.1, the images are multi-arch, with builds for amd64, arm64 and armv7.
+* `vN.N.N` - for example v0.4.1
+* `latest` - always pointing to the latest version
+* `dev-branch` - the last build on a feature/development branch
+* `dev-master` - the last build on the master branch
 
 ## Supported variables
 | **Variable**  | **Default** | **Mandatory** | **Description**                                                                                                        |
