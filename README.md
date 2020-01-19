@@ -18,14 +18,6 @@ docker run --rm -it -p 9999:9999 \
   --name coinbase-exporter \
   ixdotai/coinbase-exporter:latest
 ```
-## Tags and Arch
-
-Starting with version 0.4.1, the images are multi-arch, with builds for amd64, arm64 and armv7.
-* `vN.N.N` - for example v0.4.1
-* `latest` - always pointing to the latest version
-* `dev-branch` - the last build on a feature/development branch
-* `dev-master` - the last build on the master branch
-
 ## Supported variables
 | **Variable**  | **Default** | **Mandatory** | **Description**                                                                                                        |
 |:--------------|:-----------:|:-------------:|:-----------------------------------------------------------------------------------------------------------------------|
@@ -36,6 +28,14 @@ Starting with version 0.4.1, the images are multi-arch, with builds for amd64, a
 | `GELF_HOST`   | -           | NO            | if set, the exporter will also log to this [GELF](https://docs.graylog.org/en/3.0/pages/gelf.html) capable host on UDP |
 | `GELF_PORT`   | `12201`     | NO            | Ignored, if `GELF_HOST` is unset. The UDP port for GELF logging                                                        |
 | `PORT`        | `9308`      | NO            | The port for prometheus metrics                                                                                        |
+
+## Tags and Arch
+
+Starting with version 0.4.1, the images are multi-arch, with builds for amd64, arm64 and armv7.
+* `vN.N.N` - for example v0.4.1
+* `latest` - always pointing to the latest version
+* `dev-branch` - the last build on a feature/development branch
+* `dev-master` - the last build on the master branch
 
 ## Resources:
 * GitLab: https://gitlab.com/ix.ai/coinbase-exporter
