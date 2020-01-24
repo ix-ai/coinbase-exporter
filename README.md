@@ -7,6 +7,8 @@
 
 Prometheus exporter for [Coinbase](https://coinbase.com).
 
+> **Warning** Since Coinbase deprecated their [python library](https://github.com/coinbase/coinbase-python), I can't guarantee the maintainability of this project.
+
 ## Usage
 ```
 docker run --rm -it -p 9999:9999 \
@@ -31,7 +33,7 @@ docker run --rm -it -p 9999:9999 \
 
 ## Tags and Arch
 
-Starting with version 0.4.1, the images are multi-arch, with builds for amd64, arm64 and armv7.
+Starting with version 0.4.2, the images are multi-arch, with builds for amd64, arm64, armv7 and armv6.
 * `vN.N.N` - for example v0.4.1
 * `latest` - always pointing to the latest version
 * `dev-branch` - the last build on a feature/development branch
