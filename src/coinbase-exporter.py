@@ -5,6 +5,7 @@ import logging
 import time
 import os
 import sys
+from json.decoder import JSONDecodeError
 import pygelf
 from prometheus_client import start_http_server
 from prometheus_client.core import REGISTRY, GaugeMetricFamily
@@ -75,13 +76,20 @@ class CoinbaseCollector:
     def get_accounts(self):
         """ Establishes the connection to coinbase and saves the accounts in self.cb_accounts """
         accounts_data = []
-        accounts = self._cb.get_accounts()
-        for account in accounts['data']:
-            time.sleep(1)
-            account['transactions'] = self.get_transactions(account=account)
-            accounts_data.append(account)
-        if accounts_data:
-            self.cb_accounts = accounts_data
+        accounts = []
+        try:
+            accounts = self._cb.get_accounts()
+        except (
+                JSONDecodeError,
+        ) as error:
+            LOG.error('Exception caught: {}.'.format(error))
+        if accounts and 'data' in accounts:
+            for account in accounts['data']:
+                time.sleep(1)
+                account['transactions'] = self.get_transactions(account=account)
+                accounts_data.append(account)
+            if accounts_data:
+                self.cb_accounts = accounts_data
 
     def describe(self):
         """ Just a needed method, so that collect() isn't called at startup """
