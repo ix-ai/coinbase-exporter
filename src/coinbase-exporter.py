@@ -20,7 +20,7 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-FILENAME = os.path.splitext(sys.modules['__main__'].__file__)[0][1:]
+FILENAME = os.path.splitext(sys.modules['__main__'].__file__)[0]
 
 
 def configure_logging():
