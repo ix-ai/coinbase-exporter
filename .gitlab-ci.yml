@@ -1,6 +1,4 @@
 variables:
-  DOCKER_DRIVER: overlay2
-  DOCKERHUB_REPO_PREFIX: ixdotai
   DOCKERHUB_REPO_NAME: coinbase-exporter
   ENABLE_ARM64: 'true'
   ENABLE_ARMv7: 'true'
@@ -9,14 +7,3 @@ variables:
 include:
   - project: 'ix.ai/ci-templates'
     file: '/python-project.yml'
-
-test:
-  extends:
-    - .tags-template
-  stage: test
-  image: python:latest
-  variables:
-    TEST: 'true'
-  script:
-    - pip3 install --no-cache-dir -r src/requirements.txt
-    - python3 src/${CI_PROJECT_NAME}.py

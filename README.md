@@ -10,7 +10,7 @@ Prometheus exporter for [Coinbase](https://coinbase.com).
 > **Warning** Since Coinbase deprecated their [python library](https://github.com/coinbase/coinbase-python), I can't guarantee the maintainability of this project.
 
 ## Usage
-```
+```sh
 docker run --rm -it -p 9999:9999 \
   -e LOGLEVEL=DEBUG \
   -e API_KEY="your_api_key" \
@@ -20,6 +20,7 @@ docker run --rm -it -p 9999:9999 \
   --name coinbase-exporter \
   ixdotai/coinbase-exporter:latest
 ```
+
 ## Supported variables
 | **Variable**  | **Default** | **Mandatory** | **Description**                                                                                                        |
 |:--------------|:-----------:|:-------------:|:-----------------------------------------------------------------------------------------------------------------------|
@@ -41,6 +42,7 @@ Starting with version 0.4.2, the images are multi-arch, with builds for amd64, a
 
 ## Resources:
 * GitLab: https://gitlab.com/ix.ai/coinbase-exporter
+* GitHub: https://github.com/ix-ai/coinbase-exporter
 * Docker Hub: https://hub.docker.com/r/ixdotai/coinbase-exporter
 
 See also [ix.ai/crypto-exporter](https://gitlab.com/ix.ai/crypto-exporter) for more usage examples, including Prometheus configuration
