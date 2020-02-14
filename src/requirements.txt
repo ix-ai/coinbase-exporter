@@ -1,3 +1,0 @@
-prometheus_client==0.7.1
-coinbase==2.1.0
-pygelf==0.3.6
